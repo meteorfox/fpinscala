@@ -69,7 +69,13 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(h,t) => if (f(h)) dropWhile(t, f) else l
   }
 
-  def init[A](l: List[A]): List[A] = sys.error("todo")
+  // init returns all but the last element of a List
+  // e.g. List(1, 2, 3, 4) => List(1, 2, 3)
+  def init[A](l: List[A]): List[A] = l match {
+    case Nil => sys.error("Cannot init a Nil list")
+    case Cons(h, Nil) => Nil
+    case Cons(h, t) => Cons(h, init(t))
+  }
 
   def length[A](l: List[A]): Int = sys.error("todo")
 
