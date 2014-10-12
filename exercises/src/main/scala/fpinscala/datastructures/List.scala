@@ -34,12 +34,6 @@ object List { // `List` companion object. Contains functions for creating and wo
       case Cons(h,t) => Cons(h, append(t, a2))
     }
 
-  def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B): B = // Utility functions
-    as match {
-      case Nil => z
-      case Cons(x, xs) => f(x, foldRight(xs, z)(f))
-    }
-  
   def sum2(ns: List[Int]) = 
     foldRight(ns, 0)((x,y) => x + y)
   
@@ -77,9 +71,60 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(h, t) => Cons(h, init(t))
   }
 
-  def length[A](l: List[A]): Int = sys.error("todo")
+  def length[A](l: List[A]): Int = foldRight(l, 0)((_, acc) => acc + 1)
 
-  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = sys.error("todo")
+  @annotation.tailrec
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = l match {
+    case Nil =>  z
+    case Cons(h,t) => foldLeft(t, f(z, h))(f)
+  }
+
+  def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B): B = // Utility functions
+    as match {
+      case Nil => z
+      case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+    }
+  
+
+  def sum3(ns: List[Int]) = foldLeft(ns, 0)(_ + _)
+
+  def product3(ns: List[Double]) = foldLeft(ns, 1.0)(_ * _)
+
+  def length2[A](list: List[A]): Int = foldLeft(list, 0)((acc,_) => acc + 1)
+
+  def reverse[A](xs: List[A]): List[A] = foldLeft(xs, Nil:List[A])((acc, e) => Cons(e, acc))
+
+  def partial[A,B,C](a: A, f: (A,B) => C):  B => C =
+    (b: B) => f(a, b)
+
+  def compose[A,B,C](f: B => C, g: A => B): A => C = 
+    (a: A) => f(g(a))
+
+  def swap[A,B](f: (B, A) => B): (A, B) => B = 
+    (a, b) => f(b, a)
+
+  def partial2[A,B](f: (B, A) => B, a: A): B => B = f(_, a)
+    
+  def foldLeft2[A,B](l: List[A], z:B)(f: (B, A) => B): B = { 
+    def leftToRight(a: A, g: B => B): B => B = 
+      (b: B) => g(f(b,a))
+    def foldingRight(xs: List[A], x: B): B = 
+      foldRight(xs, (b: B) => b)(leftToRight(_, _))(x)
+    
+    foldingRight(l, z)
+  }
+  def foldRight2[A,B](l: List[A], z: B)(f: (A, B) => B): B = foldLeft(reverse(l), z)((b, a) => f(a, b))
+
+  def append2[A](l1: List[A], l2: List[A]): List[A] =
+    foldRight(l1, l2)(Cons(_, _))
+
+  def append3[A](l1: List[A], l2: List[A]): List[A] =
+    foldLeft(reverse(l1), l2)((acc: List[A], a: A) => Cons(a, acc))
+
+  def concat[A](xs: List[List[A]]): List[A] =
+    foldRight(xs, Nil: List[A])(append)
 
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+
+  val y = foldRight(List(1,2,3), Nil: List[Int])(Cons(_,_))
 }
