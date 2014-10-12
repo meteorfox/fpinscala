@@ -124,7 +124,34 @@ object List { // `List` companion object. Contains functions for creating and wo
   def concat[A](xs: List[List[A]]): List[A] =
     foldRight(xs, Nil: List[A])(append)
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+  def add1(xs: List[Int]): List[Int] =
+    foldRight(xs, Nil: List[Int])((h, t) => Cons(h + 1, t))
 
+  def doubleToString(xs: List[Double]): List[String] =
+    foldRight(xs, Nil: List[String])((h, t) => Cons(h.toString, t))
+
+  def map[A,B](l: List[A])(f: A => B): List[B] =
+    foldRight(l, Nil: List[B])((h, t) => Cons(f(h), t))
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldRight(as, Nil:List[A])((h, t) => if (f(h)) Cons(h, t) else t)
+
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] =
+    concat(map(as)(f))
+
+  def filter1[A](as: List[A])(p: A => Boolean): List[A] =
+    flatMap(as)(a => if (p(a)) List(a) else List())
+
+  def zipAdd(l1: List[Int], l2: List[Int]): List[Int] = (l1, l2) match {
+    case(Nil, _) => l2
+    case(_, Nil) => l1
+    case(Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, zipAdd(t1, t2))
+  }
+    
+  def zipWith[A,B,C](l1: List[A], l2: List[B])(f: (A, B) => C): List[C] = (l1, l2) match {
+    case(Nil, _) => Nil
+    case(_, Nil) => Nil
+    case(Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+  }
   val y = foldRight(List(1,2,3), Nil: List[Int])(Cons(_,_))
 }
